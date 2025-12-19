@@ -4,10 +4,9 @@ Resumen
 - Proyecto en Python para el procesamiento y la proyección/análisis de PQRs (Peticiones, Quejas y Reclamos). Incluye scripts para limpieza de datos, modelado temporal, generación de reportes y (opcional) una API para consulta de resultados.
 
 Características principales
-- Preprocesamiento y validación de datos de PQR.
-- Modelado/proyección temporal de volúmenes (ej.: ARIMA/Prophet/modelos ML).
-- Generación de reportes y visualizaciones.
-- Estructura modular para fácil extensión y pruebas.
+- Elaboración de PQRSDF de convocatoría basado en los resultados obtenidos por los aspirantes.
+- Consulta de los resultados obtenidos por los aspirantes.
+- Posibilidad de insertar imagenes para enriquecer el oficio del a poryección de respuesta a la PQRSDF de convocatoría.
 
 Requisitos
 - Python 3.8+
