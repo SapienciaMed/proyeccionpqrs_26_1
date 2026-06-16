@@ -28,15 +28,25 @@ def formato_numero(n):
 # Carga de datos desde archivo Parquet interno
 @st.cache_data
 def cargar_datos():
-    # Ruta interna del archivo Parquet
-    ruta_parquet = r"C:\Users\Usuario\Documents\VSCode\Pqrs_26\Resultados_Linea_pregrado_2026-1.parquet"
+    ruta_parquet = r"C:\Users\Usuario\Documents\VSCode\PQRS 2026-2\Resultados_Linea_pregrado_2026-2.parquet"
    
     try:
         df = pd.read_parquet(ruta_parquet)
-        df.fillna(0, inplace=True)
-        df['Nombre'] = df['Nombre'].astype(str).str.upper()
-        df['Documento'] = df['Documento'].astype(str)  # Asegurar tipo string
+
+        # Primero asegurar columnas de texto importantes
+        df['Nombre'] = df['Nombre'].astype("string").fillna("").str.upper()
+        df['Documento'] = df['Documento'].astype("string").fillna("")
+
+        # Rellenar columnas numéricas con 0
+        columnas_numericas = df.select_dtypes(include=["number"]).columns
+        df[columnas_numericas] = df[columnas_numericas].fillna(0)
+
+        # Rellenar columnas de texto con vacío, no con 0
+        columnas_texto = df.select_dtypes(include=["string", "object"]).columns
+        df[columnas_texto] = df[columnas_texto].fillna("")
+
         return df
+
     except Exception as e:
         st.error(f"Error al cargar la base de datos: {str(e)}")
         return None
@@ -54,7 +64,7 @@ def generar_documento(tipo_documento, row, radicado, imagen1=None, imagen2=None)
    
     # Seleccionar plantilla
     template_path = {
-        "NO PRESELECCIONADO POR PUNTO DE CORTE PP": "No_preseleccionado_por_punto_corte_pp.docx",
+        "NO PRESELECCIONADO POR PUNTO DE CORTE": "No_preseleccionado_por_punto_corte.docx",
         "NO CUMPLE HABILITANTE ART.70 LITERAL B": "No_cumple_habilitante_b.docx",
         "IMPEDIDO ART. 71 LITERAL A": "Impedido_literal_a.docx",
         "IMPEDIDO ART. 71 LITERAL C": "Impedido_literal_c.docx",
@@ -109,16 +119,28 @@ if df is not None:
         col1, col2, col3 = st.columns(3)
         with col1:
             st.info(f"**Documento:** {row['Documento']}")
+        with col1:
+            st.info(f"**Nombre:** {row['Nombre']}")
+        with col1:
+            st.info(f"**Fuente de financiación PP:** {row['fuente_pp']}")
+        with col1:
+            st.info(f"**Fuente de financiación RO:** {row['fuente_ro']}")
         with col2:
             st.info(f"**Comuna:** {row['Comuna']}")
         with col2:
-            st.info(f"**Estrato:** {row['Estrato']}")
-        with col3:
+            st.info(f"**Estrato PP:** {row['Estrato_pp']}")
+        with col2:
+            st.info(f"**Estrato RO:** {row['Estrato_ro']}")
+        with col2:
             st.info(f"**Puntaje total:** {row['cal_total']}")
         with col3:
             st.info(f"**Puntaje de corte PP:** {row['punto_corte_pp']}")
         with col3:
             st.info(f"**RESULTADO CONVOCATORIA PP:** {row['Observaciones Presupuesto Participativo']}")
+        with col3:
+            st.info(f"**Puntaje de corte RO:** {row['punto_corte_ro']}")
+        with col3:
+            st.info(f"**RESULTADO CONVOCATORIA RO:** {row['Observaciones Recurso Ordinario']}")
         
         # Sección para ingreso del radicado
         st.divider()
@@ -133,7 +155,7 @@ if df is not None:
         # Selección de documento a generar
         tipo_documento = st.selectbox(
             "Seleccione el tipo de documento a generar:",
-            ["NO PRESELECCIONADO POR PUNTO DE CORTE PP", "NO CUMPLE HABILITANTE ART.70 LITERAL B",
+            ["NO PRESELECCIONADO POR PUNTO DE CORTE", "NO CUMPLE HABILITANTE ART.70 LITERAL B",
              "IMPEDIDO ART. 71 LITERAL A",
              "IMPEDIDO ART. 71 LITERAL C"]
         )
@@ -143,7 +165,7 @@ if df is not None:
         st.subheader("🖼️ Adjuntar imagenes en la PQRSDF")
         
         # Determinar qué imágenes solicitar según el tipo de documento
-        if tipo_documento == "NO PRESELECCIONADO POR PUNTO DE CORTE PP":
+        if tipo_documento == "NO PRESELECCIONADO POR PUNTO DE CORTE":
             st.info("💡 Para este tipo de documento, se requieren dos imágenes como evidencia")
             col_img1, col_img2 = st.columns(2)
             
@@ -206,7 +228,7 @@ if df is not None:
                     )
                     
                     # Mostrar resumen de lo generado
-                    if tipo_documento == "NO PRESELECCIONADO POR PUNTO DE CORTE PP":
+                    if tipo_documento == "NO PRESELECCIONADO POR PUNTO DE CORTE":
                         evidencias_text = f"Evidencias adjuntas: {bool(imagen1)} clúster, {bool(imagen2)} total"
                     else:
                         evidencias_text = f"Evidencia adjunta: {bool(imagen1)}"
