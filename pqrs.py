@@ -28,7 +28,7 @@ def formato_numero(n):
 # Carga de datos desde archivo Parquet interno
 @st.cache_data
 def cargar_datos():
-    ruta_parquet = r"C:\Users\Usuario\Documents\VSCode\PQRS 2026-2\Resultados_Linea_pregrado_2026-2.parquet"
+    ruta_parquet = r"C:\Users\Usuario\Documents\Github\proyeccionpqrs_26_1\Resultados_Linea_pregrado_2026-2.parquet"
    
     try:
         df = pd.read_parquet(ruta_parquet)
